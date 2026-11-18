@@ -117,4 +117,23 @@ class PostPersistenceTest {
         assertThat(em.find(Post.class, post.getId())).isNull();
         assertThat(em.find(PostComment.class, commentId)).isNull();
     }
+
+    @Test
+    @DisplayName("글에서 id로 댓글을 찾을 수 있고, 다른 글의 댓글이나 없는 id면 비어 있다")
+    void findCommentById() {
+        Post post = new Post("제목", "내용");
+        post.addComment("댓글");
+        Post other = new Post("다른 제목", "다른 내용");
+        other.addComment("다른 댓글");
+        em.persist(other);
+        post = persistAndReload(post);
+        other = em.find(Post.class, other.getId());
+
+        PostComment comment = post.getComments().getFirst();
+        Long otherCommentId = other.getComments().getFirst().getId();
+
+        assertThat(post.findCommentById(comment.getId())).contains(comment);
+        assertThat(post.findCommentById(otherCommentId)).isEmpty();
+        assertThat(post.findCommentById(Long.MAX_VALUE)).isEmpty();
+    }
 }

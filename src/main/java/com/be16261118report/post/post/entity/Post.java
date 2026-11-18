@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 // 글 엔티티
 // 댓글은 별도 서비스/레포지토리 없이 글(애그리거트 루트)을 통해서만 추가·수정·삭제한다.
@@ -41,6 +42,13 @@ public class Post extends BaseEntity {
         PostComment comment = new PostComment(this, content);
         comments.add(comment);
         return comment;
+    }
+
+    // 이 글에 달린 댓글 중에서만 찾는다. (다른 글의 댓글 id면 비어 있음)
+    public Optional<PostComment> findCommentById(long id) {
+        return comments.stream()
+                .filter(comment -> comment.getId() != null && comment.getId() == id)
+                .findFirst();
     }
 
     public void modifyComment(PostComment comment, String content) {
